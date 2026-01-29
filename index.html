@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>나의 운, 지금 · Prototype</title>
+  <style>
+    :root{
+      --bg0:#070912;
+      --bg1:#0d1030;
+      --card: rgba(255,255,255,.07);
+      --card2: rgba(255,255,255,.10);
+      --line: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --muted2: rgba(255,255,255,.55);
+      --gold: #f2c56b;
+      --gold2:#f7dba0;
+      --danger:#ff6b6b;
+      --ok:#7cf7c6;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 50% 20%, rgba(247,219,160,.18), transparent 60%),
+        radial-gradient(900px 600px at 70% 70%, rgba(121,137,255,.16), transparent 60%),
+        radial-gradient(900px 700px at 20% 80%, rgba(255,171,171,.10), transparent 55%),
+        linear-gradient(160deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    /* subtle stars */
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.55) 0, transparent 2px),
+        radial-gradient(1px 1px at 80% 30%, rgba(255,255,255,.55) 0, transparent 2px),
+        radial-gradient(1px 1px at 50% 70%, rgba(255,255,255,.35) 0, transparent 2px),
+        radial-gradient(1px 1px at 25% 60%, rgba(255,255,255,.25) 0, transparent 2px),
+        radial-gradient(1px 1px at 65% 15%, rgba(255,255,255,.28) 0, transparent 2px),
+        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,.20) 0, transparent 2px),
+        radial-gradient(1px 1px at 90% 85%, rgba(255,255,255,.22) 0, transparent 2px);
+      opacity:.7;
+      pointer-events:none;
+    }
+
+    .app{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px 16px 48px;
+    }
+
+    .shell{
+      width:min(420px, 100%);
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .moon{
+      width:36px; height:36px;
+      border-radius:50%;
+      background: radial-gradient(circle at 35% 35%, #fff, #ffdca5 45%, rgba(242,197,107,.25) 70%, transparent 72%);
+      box-shadow: 0 0 30px rgba(242,197,107,.25);
+      position:relative;
+      overflow:hidden;
+    }
+    .moon:after{
+      content:"";
+      position:absolute; inset:-10px;
+      background: radial-gradient(closest-side at 65% 55%, rgba(0,0,0,.25), transparent 60%);
+      transform:rotate(10deg);
+    }
+
+    h1{
+      font-size:18px;
+      margin:0;
+      letter-spacing:-0.3px;
+    }
+    .subtitle{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    .pill{
+      font-size:11px;
+      padding:8px 10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      color:var(--muted);
+      background: rgba(255,255,255,.04);
+      backdrop-filter: blur(8px);
+    }
+
+    .card{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, var(--card), rgba(255,255,255,.05));
+      border-radius:18px;
+      padding:16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero{
+      padding:18px 16px 12px;
+      border-radius:16px;
+      border:1px solid rgba(242,197,107,.22);
+      background:
+        radial-gradient(380px 180px at 20% 10%, rgba(242,197,107,.18), transparent 60%),
+        radial-gradient(260px 160px at 80% 0%, rgba(247,219,160,.14), transparent 55%),
+        rgba(255,255,255,.03);
+      margin-bottom:14px;
+    }
+    .hero-title{
+      font-size:16px;
+      margin:0;
+      letter-spacing:-0.4px;
+    }
+    .hero-desc{
+      margin:8px 0 0;
+      font-size:12.5px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px;
+    }
+
+    input, select{
+      width:100%;
+      padding:12px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.15);
+      color:var(--text);
+      outline:none;
+    }
+    input::placeholder{color:rgba(255,255,255,.45)}
+
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    button{
+      width:100%;
+      padding:13px 12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      cursor:pointer;
+      transition: transform .06s ease, background .2s ease, border-color .2s ease;
+    }
+    button:active{transform: scale(.99)}
+
+    .btn-primary{
+      border-color: rgba(242,197,107,.35);
+      background: linear-gradient(180deg, rgba(242,197,107,.20), rgba(255,255,255,.06));
+      box-shadow: 0 10px 30px rgba(242,197,107,.10);
+    }
+
+    .btn-link{
+      background: transparent;
+      border: none;
+      padding: 8px 10px;
+      color: var(--gold2);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .hint{
+      font-size:11.5px;
+      color:var(--muted2);
+      margin-top:10px;
+      line-height:1.45;
+    }
+
+    .error{
+      font-size:12px;
+      color: var(--danger);
+      margin-top:10px;
+      display:none;
+    }
+
+    /* screens */
+    .screen{display:none}
+    .screen.active{display:block}
+
+    /* splash */
+    .splash{
+      padding:0;
+      text-align:center;
+      position:fixed; /* 전체 화면 로딩 */
+      inset:0;
+      z-index:9999;
+      overflow:hidden;
+    }
+
+    .splash-image{
+      background: url('main-img.png') center / cover no-repeat;
+    }
+
+    /* splash fade */
+    .splash.hide{
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .6s ease;
+    }
+
+    .card{
+      background: url('main-img.png') center / cover no-repeat;
+    }
+
+    .loading-overlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(180deg, rgba(7,9,18,.55), rgba(7,9,18,.85));
+      backdrop-filter: blur(2px);
+    }
+
+    .logo{
+      font-size:26px;
+      letter-spacing:-1px;
+      margin:0 0 6px;
+      color: var(--gold2);
+      text-shadow: 0 0 25px rgba(242,197,107,.35);
+    }
+
+    .loading{
+      margin-top:16px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    /* result */
+    .meta{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .date{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .title{
+      font-size:18px;
+      margin:2px 0 0;
+      letter-spacing:-0.5px;
+    }
+    .summary{
+      color: var(--gold2);
+      font-size:13px;
+      margin-top:6px;
+      line-height:1.4;
+    }
+    .fortune{
+      margin-top:12px;
+      padding:14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      line-height:1.65;
+      font-size:13.5px;
+      white-space:pre-line;
+    }
+
+    .score-wrap{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    .score{
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    .score .k{font-size:12px;color:var(--muted)}
+    .score .v{margin-top:6px;font-size:14px;letter-spacing:.2px}
+
+    .stars{letter-spacing:1.5px}
+
+    .chips{display:flex;flex-wrap:wrap; gap:8px; margin-top:12px}
+    .chip{
+      font-size:11px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(242,197,107,.26);
+      color: rgba(247,219,160,.95);
+      background: rgba(242,197,107,.08);
+    }
+
+    .footer-actions{
+      display:flex;
+      gap:10px;
+      margin-top:14px;
+    }
+    .footer-actions button{padding:12px}
+
+    /* history list */
+    .list{
+      margin-top:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .item{
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      cursor:pointer;
+      transition: transform .06s ease, background .2s ease;
+    }
+    .item:hover{background: rgba(255,255,255,.06)}
+    .item:active{transform:scale(.99)}
+    .item .d{font-size:12px;color:var(--muted)}
+    .item .s{margin-top:6px;color:rgba(255,255,255,.90);font-size:13px;line-height:1.35}
+
+    .tiny{
+      font-size:11px;
+      color: var(--muted2);
+      margin-top:10px;
+    }
+
+    .divider{
+      height:1px;
+      background: rgba(255,255,255,.10);
+      margin: 12px 0;
+    }
+
+    .iconbtn{
+      width:auto;
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .logo-underline:after{animation:none}
+      button{transition:none}
+      .item{transition:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">
+          <div class="moon" aria-hidden="true"></div>
+          <div>
+            <h1>나의 운, 지금</h1>
+            <div class="subtitle">로그인 없이 · 디바이스 저장 · 프로토타입</div>
+          </div>
+        </div>
+        <button class="iconbtn" id="btnReset" title="프로필/기록 초기화">초기화</button>
+      </div>
+
+      <div class="card">
+        <!-- Splash -->
+        <section id="screenSplash" class="screen active">
+          <div class="splash splash-image">
+            <div class="loading-overlay">
+              <div class="logo">나의 운, 지금</div>
+              <div class="logo-underline" aria-hidden="true"></div>
+              <div class="loading" id="loadingText">운명을 불러오는 중…</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Main -->
+        <section id="screenMain" class="screen">
+          <div class="hero">
+            <p class="hero-title">오늘의 운을 확인해보세요</p>
+            <p class="hero-desc">별명과 생년월일(시간), 성별을 <b>디바이스에만 저장</b>해요. 다음부터는 입력 없이 바로 볼 수 있어요.</p>
+          </div>
+
+          <form id="profileForm" autocomplete="off">
+            <div class="grid">
+              <div>
+                <label for="nickname">별명</label>
+                <input id="nickname" maxlength="30" placeholder="예: 미나" required />
+              </div>
+
+              <div>
+                <label>생년월일</label>
+                <div class="row2">
+                  <select id="birthYear" required></select>
+                  <select id="birthMonth" required></select>
+                </div>
+                <select id="birthDay" required style="margin-top:8px;"></select>
+              </div>
+
+              <div class="row2">
+                <label>태어난 시간 (필수)</label>
+                  <div class="row2">
+                    <select id="birthHour" required></select>
+                    <select id="birthMinute" required></select>
+                  </div>
+                  <label style="margin-top:6px; display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--muted)">
+                    <input type="checkbox" id="unknownTime" /> 정확한 시간 모름
+                  </label>
+                <div>
+                  <label for="gender">성별</label>
+                  <select id="gender" required>
+                    <option value="" selected disabled>선택</option>
+                    <option value="F">여성</option>
+                    <option value="M">남성</option>
+                    <option value="X">기타/선택안함</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn-primary" type="submit" id="btnToday">오늘의 운 보기</button>
+              <button type="button" class="btn-link" id="btnHistory">이전 운세 다시 보기</button>
+            </div>
+
+            <div class="error" id="formError">입력값을 확인해 주세요.</div>
+            <div class="hint">※ 프로토타입은 서버 없이 동작하며, 운세 결과는 디바이스 저장소에 기록돼요(개발용).</div>
+          </form>
+        </section>
+
+        <!-- Result -->
+        <section id="screenResult" class="screen">
+          <div class="meta">
+            <div>
+              <div class="date" id="resultDate">-</div>
+              <div class="title" id="resultTitle">오늘의 운세</div>
+              <div class="summary" id="resultSummary">-</div>
+            </div>
+            <button class="iconbtn" id="btnBackToMain">메인</button>
+          </div>
+
+          <div class="fortune" id="resultContent">-</div>
+
+          <div class="score-wrap" id="scoreWrap"></div>
+          <div class="chips" id="keywordChips"></div>
+
+          <div class="divider"></div>
+
+          <div class="footer-actions">
+            <button class="btn-primary" id="btnRefreshToday" type="button">오늘 운 다시 생성</button>
+            <button type="button" id="btnGoHistory">이전 결과</button>
+          </div>
+          <div class="tiny" id="tinyMeta"></div>
+        </section>
+
+        <!-- History -->
+        <section id="screenHistory" class="screen">
+          <div class="meta">
+            <div>
+              <div class="date">기록</div>
+              <div class="title">이전 운세</div>
+              <div class="summary" style="color:var(--muted)">날짜를 누르면 결과를 다시 볼 수 있어요</div>
+            </div>
+            <button class="iconbtn" id="btnBackFromHistory">뒤로</button>
+          </div>
+
+          <div class="list" id="historyList"></div>
+          <div class="tiny">※ 이 프로토타입은 운세를 로컬에 저장합니다. 실제 서비스에선 서버 저장으로 교체하면 됩니다.</div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * 나의 운, 지금 — 로그인 없는 프로토타입
+     * - 프로필: localStorage 저장 (nickname, birth_date, birth_time, gender)
+     * - 식별자: device_key(UUID) localStorage 저장
+     * - 운세 결과: localStorage 저장 (fortune_daily)
+     *
+     * 실제 서비스로 확장 시:
+     * - fortune 저장을 서버 DB로 이동
+     * - device_key를 서버 devices 테이블에 매핑
+     */
+
+    // -------------------------------
+    // Storage keys
+    // -------------------------------
+    const LS_DEVICE = 'nuj_device_key';
+    const LS_PROFILE = 'nuj_profile';
+    const LS_FORTUNES = 'nuj_fortunes'; // array
+
+    // -------------------------------
+    // DOM
+    // -------------------------------
+    const screens = {
+      splash: document.getElementById('screenSplash'),
+      main: document.getElementById('screenMain'),
+      result: document.getElementById('screenResult'),
+      history: document.getElementById('screenHistory'),
+    };
+
+    const loadingText = document.getElementById('loadingText');
+
+    const form = document.getElementById('profileForm');
+    const nicknameEl = document.getElementById('nickname');
+    const birthYearEl = document.getElementById('birthYear');
+    const birthMonthEl = document.getElementById('birthMonth');
+    const birthDayEl = document.getElementById('birthDay');
+    const birthHourEl = document.getElementById('birthHour');
+    const birthMinuteEl = document.getElementById('birthMinute');
+    const unknownTimeEl = document.getElementById('unknownTime');
+    const genderEl = document.getElementById('gender');
+    const formError = document.getElementById('formError');
+
+    const btnHistory = document.getElementById('btnHistory');
+    const btnReset = document.getElementById('btnReset');
+
+    const resultDate = document.getElementById('resultDate');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultSummary = document.getElementById('resultSummary');
+    const resultContent = document.getElementById('resultContent');
+    const scoreWrap = document.getElementById('scoreWrap');
+    const keywordChips = document.getElementById('keywordChips');
+    const tinyMeta = document.getElementById('tinyMeta');
+
+    const btnBackToMain = document.getElementById('btnBackToMain');
+    const btnRefreshToday = document.getElementById('btnRefreshToday');
+    const btnGoHistory = document.getElementById('btnGoHistory');
+
+    const historyList = document.getElementById('historyList');
+    const btnBackFromHistory = document.getElementById('btnBackFromHistory');
+
+    // -------------------------------
+    // Helpers
+    // -------------------------------
+    function showScreen(name){
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screens[name].classList.add('active');
+    }
+
+    function pad2(n){return String(n).padStart(2,'0')}
+
+    function todayStr(){
+      const d = new Date();
+      return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    }
+
+    function toKoreanDate(ymd){
+      const [y,m,d] = ymd.split('-');
+      return `${y}.${m}.${d}`;
+    }
+
+    function uuidv4(){
+      // RFC4122 v4 (good enough for prototype)
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = (crypto.getRandomValues(new Uint8Array(1))[0] & 15);
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+
+    function getDeviceKey(){
+      let k = localStorage.getItem(LS_DEVICE);
+      if(!k){
+        k = uuidv4();
+        localStorage.setItem(LS_DEVICE, k);
+      }
+      return k;
+    }
+
+    function getProfile(){
+      const raw = localStorage.getItem(LS_PROFILE);
+      if(!raw) return null;
+      try{ return JSON.parse(raw);}catch{ return null; }
+    }
+
+    function saveProfile(p){
+      localStorage.setItem(LS_PROFILE, JSON.stringify(p));
+    }
+
+    function getFortunes(){
+      const raw = localStorage.getItem(LS_FORTUNES);
+      if(!raw) return [];
+      try{
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      }catch{ return []; }
+    }
+
+    function saveFortunes(arr){
+      localStorage.setItem(LS_FORTUNES, JSON.stringify(arr));
+    }
+
+    function upsertFortune(f){
+      const arr = getFortunes();
+      const idx = arr.findIndex(x => x.fortune_date === f.fortune_date);
+      if(idx >= 0) arr[idx] = f; else arr.push(f);
+      arr.sort((a,b) => (a.fortune_date < b.fortune_date ? 1 : -1));
+      saveFortunes(arr);
+    }
+
+    function findFortuneByDate(ymd){
+      return getFortunes().find(x => x.fortune_date === ymd) || null;
+    }
+
+    async function sha256Hex(text){
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      const arr = Array.from(new Uint8Array(buf));
+      return arr.map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function stars(n){
+      const full = '🌕'.repeat(Math.max(0, Math.min(5,n)));
+      const empty = '🌑'.repeat(Math.max(0, 5 - Math.min(5,n)));
+      return full + empty;
+    }
+
+    function renderScores(scores){
+      scoreWrap.innerHTML = '';
+      const entries = Object.entries(scores || {});
+      const labelMap = { money:'금전운', love:'연애운', health:'건강운', work:'일·학업' };
+      const use = entries.length ? entries : [['money',3],['love',3],['health',3],['work',3]];
+      use.slice(0,4).forEach(([k,v]) => {
+        const div = document.createElement('div');
+        div.className = 'score';
+        div.innerHTML = `
+          <div class="k">${labelMap[k] || k}</div>
+          <div class="v"><span class="stars">${stars(Number(v)||0)}</span></div>
+        `;
+        scoreWrap.appendChild(div);
+      });
+    }
+
+    function renderKeywords(keywords){
+      keywordChips.innerHTML = '';
+      (keywords || []).slice(0,6).forEach(k => {
+        const c = document.createElement('div');
+        c.className = 'chip';
+        c.textContent = `#${k}`;
+        keywordChips.appendChild(c);
+      });
+    }
+
+    function setMainForm(profile){
+      if(!profile) return;
+      nicknameEl.value = profile.nickname || '';
+
+      // birth date
+      if(profile.birth_date){
+        const [y,m,d] = profile.birth_date.split('-');
+        birthYearEl.value = y;
+        birthMonthEl.value = String(Number(m));
+        birthDayEl.value = String(Number(d));
+      }
+
+      // birth time
+      if(profile.birth_time === 'unknown'){
+        unknownTimeEl.checked = true;
+        birthHourEl.value = 'unknown';
+        birthMinuteEl.value = 'unknown';
+        birthHourEl.disabled = true;
+        birthMinuteEl.disabled = true;
+      } else {
+        unknownTimeEl.checked = false;
+        birthHourEl.disabled = false;
+        birthMinuteEl.disabled = false;
+        if(profile.birth_time){
+          const [h,mi] = profile.birth_time.split(':');
+          birthHourEl.value = h;
+          birthMinuteEl.value = mi;
+        }
+      }
+
+      genderEl.value = profile.gender || '';
+    }
+
+    // -------------------------------
+    // Fortune generator (mock)
+    // 실제 서비스에서는 여기서 서버 API 호출로 교체
+    // -------------------------------
+    const TEMPLATES = {
+      opener: [
+        '오늘은 {name}님에게 “{theme}”이(가) 핵심 키워드로 떠올라요.',
+        '{name}님에게 오늘은 {theme}의 기운이 강해요.',
+        '오늘의 흐름은 {name}님에게 {theme} 쪽으로 기울어 있어요.'
+      ],
+      bodyA: [
+        '조급하게 결론을 내리기보다는, 한 번 더 확인하는 태도가 운을 끌어올립니다. 특히 사람과의 약속이나 일정은 “확인 메시지 1번”이 실수를 막아줘요.',
+        '작은 선택이 하루의 분위기를 크게 바꿀 수 있어요. ‘지금 해야 할 것’과 ‘나중에 해도 되는 것’을 구분하면 마음이 가벼워집니다.',
+        '감정이 앞서면 판단이 흐려질 수 있어요. 오늘은 한 박자 쉬어가는 여유가 오히려 속도를 만들어줍니다.'
+      ],
+      bodyB: [
+        '돈과 관련해선 충동 구매보다 “필요/원함”을 나누는 게 좋아요. 당장 필요한 것 1개만 골라보면 지출이 정리됩니다.',
+        '대화운이 좋아서, 가볍게 안부를 건네면 관계가 부드러워져요. 다만 단정적인 말보다 “나는 이렇게 느꼈어”가 더 잘 통합니다.',
+        '컨디션은 무리하지 않는 선에서 올라와요. 물 한 컵, 가벼운 스트레칭 같은 작은 루틴이 생각보다 큰 효과를 줍니다.'
+      ],
+      closer: [
+        '오늘의 한 줄: “{mini}”',
+        '마무리 팁: “{mini}”',
+        '{name}님, 오늘은 “{mini}”를 기억해요.'
+      ]
+    };
+
+    const THEMES = ['절제', '선택', '정리', '대화', '집중', '휴식', '균형', '용기'];
+    const MINIS = ['작게 시작하면 크게 이어져요', '확인 한 번이 운을 지켜줘요', '나를 먼저 챙기면 길이 보여요', '오늘의 기준은 “가벼움”이에요', '한 번에 하나씩만 해도 충분해요'];
+    const KEYWORDS_POOL = ['절제','선택','정리','대화','기회','안정','유연함','집중','휴식','우선순위','감사','리듬'];
+
+    function pick(arr, seedInt){
+      const i = Math.abs(seedInt) % arr.length;
+      return arr[i];
+    }
+
+    function seedFrom(profile, ymd){
+      // simple deterministic-ish seed so "같은 정보/날짜면 비슷한 결과" 느낌
+      const s = `${profile.nickname}|${profile.birth_date}|${profile.birth_time}|${profile.gender}|${ymd}`;
+      let h = 0;
+      for(let i=0;i<s.length;i++){
+        h = (h<<5) - h + s.charCodeAt(i);
+        h |= 0;
+      }
+      return h;
+    }
+
+    function makeScores(seed){
+      const r = (n) => ((Math.abs(seed + n*97) % 5) + 1); // 1..5
+      return { money:r(1), love:r(2), health:r(3), work:r(4) };
+    }
+
+    function makeKeywords(seed){
+      const out = [];
+      for(let i=0;i<4;i++){
+        out.push(pick(KEYWORDS_POOL, seed + i*31));
+      }
+      // unique
+      return Array.from(new Set(out));
+    }
+
+    function format(t, data){
+      return t
+        .replaceAll('{name}', data.name)
+        .replaceAll('{theme}', data.theme)
+        .replaceAll('{mini}', data.mini);
+    }
+
+    async function generateFortune(profile, ymd){
+      // simulate loading
+      await new Promise(r => setTimeout(r, 700));
+
+      const seed = seedFrom(profile, ymd);
+      const theme = pick(THEMES, seed);
+      const mini = pick(MINIS, seed + 13);
+
+      const opener = format(pick(TEMPLATES.opener, seed), {name: profile.nickname, theme, mini});
+      const body1 = pick(TEMPLATES.bodyA, seed + 7);
+      const body2 = pick(TEMPLATES.bodyB, seed + 17);
+      const closer = format(pick(TEMPLATES.closer, seed + 23), {name: profile.nickname, theme, mini});
+
+      const content = `${opener}
+
+${body1}
+
+${body2}
+
+${closer}`;
+
+      const scores = makeScores(seed);
+      const keywords = makeKeywords(seed);
+      const summary = `${theme}의 기운이 강해요 — ${mini}`;
+
+      const device_key = getDeviceKey();
+      const profile_hash = await sha256Hex(`${profile.nickname}|${profile.birth_date}|${profile.birth_time}|${profile.gender}`);
+
+      return {
+        id: uuidv4(),
+        device_key,
+        fortune_date: ymd,
+        profile_hash,
+        summary,
+        content,
+        scores,
+        keywords,
+        model: 'mock-v1',
+        prompt_version: 'v0',
+        created_at: new Date().toISOString(),
+      };
+    }
+
+    // -------------------------------
+    // UI actions
+    // -------------------------------
+    async function goToToday(forceRegenerate=false){
+      const profile = getProfile();
+      if(!profile){
+        showScreen('main');
+        return;
+      }
+
+      const ymd = todayStr();
+      let f = (!forceRegenerate) ? findFortuneByDate(ymd) : null;
+
+      // if profile changed, regenerate (optional behavior)
+      if(f && f.profile_hash){
+        const currentHash = await sha256Hex(`${profile.nickname}|${profile.birth_date}|${profile.birth_time}|${profile.gender}`);
+        if(currentHash !== f.profile_hash) f = null;
+      }
+
+      if(!f){
+        showScreen('splash');
+        loadingText.textContent = '오늘의 운을 불러오는 중…';
+        f = await generateFortune(profile, ymd);
+        upsertFortune(f);
+      }
+
+      renderResult(f);
+      showScreen('result');
+    }
+
+    function renderResult(f){
+      resultDate.textContent = toKoreanDate(f.fortune_date);
+      resultTitle.textContent = (f.fortune_date === todayStr()) ? '오늘의 운세' : '운세 결과';
+      resultSummary.textContent = f.summary;
+      resultContent.textContent = f.content;
+      renderScores(f.scores);
+      renderKeywords(f.keywords);
+      tinyMeta.textContent = `device_key: ${String(f.device_key).slice(0,8)}…  ·  ${f.model}  ·  ${f.prompt_version}`;
+    }
+
+    function goHistory(){
+      const profile = getProfile();
+      if(!profile){
+        showScreen('main');
+        return;
+      }
+      const arr = getFortunes();
+      historyList.innerHTML = '';
+
+      if(arr.length === 0){
+        const empty = document.createElement('div');
+        empty.className = 'item';
+        empty.style.cursor = 'default';
+        empty.innerHTML = `<div class="d">아직 기록이 없어요</div><div class="s">오늘의 운을 먼저 확인해보세요.</div>`;
+        historyList.appendChild(empty);
+      } else {
+        arr.forEach(f => {
+          const it = document.createElement('div');
+          it.className = 'item';
+          it.dataset.date = f.fortune_date;
+          it.innerHTML = `<div class="d">${toKoreanDate(f.fortune_date)}</div><div class="s">${escapeHtml(f.summary)}</div>`;
+          it.addEventListener('click', () => {
+            const picked = findFortuneByDate(f.fortune_date);
+            if(picked){
+              renderResult(picked);
+              showScreen('result');
+            }
+          });
+          historyList.appendChild(it);
+        });
+      }
+
+      showScreen('history');
+    }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
+    }
+
+    function validateForm(){
+      formError.style.display = 'none';
+      const nickname = nicknameEl.value.trim();
+
+      const y = birthYearEl.value;
+      const m = birthMonthEl.value;
+      const d = birthDayEl.value;
+      const birth_date = y && m && d ? `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}` : '';
+
+      let birth_time = '';
+      if(unknownTimeEl.checked){
+        birth_time = 'unknown';
+      } else {
+        const h = birthHourEl.value;
+        const mi = birthMinuteEl.value;
+        birth_time = h && mi ? `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}` : '';
+      }
+
+      const gender = genderEl.value;
+
+      if(!nickname || !birth_date || !gender || birth_time === ''){
+        formError.textContent = '별명/생년월일/태어난 시간/성별을 모두 입력해 주세요.';
+        formError.style.display = 'block';
+        return null;
+      }
+
+      return {
+        nickname,
+        birth_date,
+        birth_time,
+        gender,
+        timezone: 'Asia/Seoul',
+        device_key: getDeviceKey(),
+        updated_at: new Date().toISOString(),
+      };
+    }
+
+    // -------------------------------
+    // Events
+    // -------------------------------
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const p = validateForm();
+      if(!p) return;
+      saveProfile(p);
+      // 로딩 후 전환
+          await goToToday(false);
+          document.getElementById('screenSplash').classList.add('hide');
+    });
+
+    btnHistory.addEventListener('click', () => {
+      const profile = getProfile();
+      if(!profile){
+        formError.textContent = '이전 결과를 보려면 먼저 프로필을 저장해 주세요.';
+        formError.style.display = 'block';
+        return;
+      }
+      goHistory();
+    });
+
+    btnBackToMain.addEventListener('click', () => {
+      showScreen('main');
+      setMainForm(getProfile());
+    });
+
+    btnGoHistory.addEventListener('click', () => goHistory());
+
+    btnBackFromHistory.addEventListener('click', () => {
+      // 돌아갈 곳: 결과가 있으면 결과, 없으면 메인
+      const has = getFortunes().length > 0;
+      if(has){
+        const first = getFortunes()[0];
+        renderResult(first);
+        showScreen('result');
+      } else {
+        showScreen('main');
+        setMainForm(getProfile());
+      }
+    });
+
+    btnRefreshToday.addEventListener('click', async () => {
+      await goToToday(true);
+    });
+
+    btnReset.addEventListener('click', () => {
+      const ok = confirm('프로필과 운세 기록을 모두 초기화할까요?');
+      if(!ok) return;
+      localStorage.removeItem(LS_PROFILE);
+      localStorage.removeItem(LS_FORTUNES);
+      localStorage.removeItem(LS_DEVICE);
+
+      nicknameEl.value = '';
+      birthYearEl.value = '';
+      birthMonthEl.value = '';
+      birthDayEl.value = '';
+      birthHourEl.value = '';
+      birthMinuteEl.value = '';
+      unknownTimeEl.checked = false;
+      birthHourEl.disabled = false;
+      birthMinuteEl.disabled = false;
+      genderEl.value = '';
+
+      // re-init options & go main
+      initSelects();
+      showScreen('main');
+    });
+
+    // -------------------------------
+    // Boot
+    // -------------------------------
+    function initSelects(){
+      const now = new Date();
+      const thisYear = now.getFullYear();
+
+      // years
+      birthYearEl.innerHTML = '<option value="" disabled selected>연도</option>';
+      for(let y=thisYear; y>=1900; y--){
+        const o=document.createElement('option');
+        o.value=String(y);
+        o.textContent=y+'년';
+        birthYearEl.appendChild(o);
+      }
+
+      // months
+      birthMonthEl.innerHTML = '<option value="" disabled selected>월</option>';
+      for(let mm=1; mm<=12; mm++){
+        const o=document.createElement('option');
+        o.value=String(mm);
+        o.textContent=mm+'월';
+        birthMonthEl.appendChild(o);
+      }
+
+      // days
+      birthDayEl.innerHTML = '<option value="" disabled selected>일</option>';
+      for(let dd=1; dd<=31; dd++){
+        const o=document.createElement('option');
+        o.value=String(dd);
+        o.textContent=dd+'일';
+        birthDayEl.appendChild(o);
+      }
+
+      // hours
+      birthHourEl.innerHTML = '<option value="" disabled selected>시</option>';
+      for(let hh=0; hh<24; hh++){
+        const v = String(hh).padStart(2,'0');
+        const o=document.createElement('option');
+        o.value=v;
+        o.textContent=v+'시';
+        birthHourEl.appendChild(o);
+      }
+
+      // minutes (5분 단위)
+      birthMinuteEl.innerHTML = '<option value="" disabled selected>분</option>';
+      for(let mi=0; mi<60; mi+=5){
+        const v = String(mi).padStart(2,'0');
+        const o=document.createElement('option');
+        o.value=v;
+        o.textContent=v+'분';
+        birthMinuteEl.appendChild(o);
+      }
+
+      // unknown time option values
+      const unknownOptH = document.createElement('option');
+      unknownOptH.value = 'unknown';
+      unknownOptH.textContent = '모름';
+      const unknownOptM = document.createElement('option');
+      unknownOptM.value = 'unknown';
+      unknownOptM.textContent = '모름';
+      birthHourEl.appendChild(unknownOptH);
+      birthMinuteEl.appendChild(unknownOptM);
+    }
+
+    (function init(){
+      getDeviceKey();
+      initSelects();
+      const profile = getProfile();
+      const fortunes = getFortunes();
+
+      // unknown time toggle
+      unknownTimeEl.addEventListener('change', () => {
+        if(unknownTimeEl.checked){
+          birthHourEl.value = 'unknown';
+          birthMinuteEl.value = 'unknown';
+          birthHourEl.disabled = true;
+          birthMinuteEl.disabled = true;
+        } else {
+          birthHourEl.disabled = false;
+          birthMinuteEl.disabled = false;
+          birthHourEl.value = '';
+          birthMinuteEl.value = '';
+        }
+      });
+
+      // show splash briefly then route
+      showScreen('splash');
+      // 최소 1초 로딩 화면 유지
+      setTimeout(async () => {
+        if(profile){
+          // if today's fortune exists -> show it, else generate
+          await goToToday(false);
+        } else {
+          showScreen('main');
+        }
+      }, 900);
+
+      if(profile) setMainForm(profile);
+
+      // If profile exists but gender select is empty (older save), set default
+      if(profile && !profile.gender){
+        genderEl.value = 'X';
+      }
+
+      // If there are fortunes but no profile, keep them (prototype). Real service would need link.
+      if(!profile && fortunes.length){
+        // no-op
+      }
+    })();
+  </script>
+</body>
+</html>
